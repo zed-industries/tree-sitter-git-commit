@@ -4,3 +4,5 @@
 /log.html
 /*.wasm
 /gh-pages/
+target/
+Cargo.lock
