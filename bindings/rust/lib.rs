@@ -15,18 +15,16 @@
 //! [Parser]: https://docs.rs/tree-sitter/*/tree_sitter/struct.Parser.html
 //! [tree-sitter]: https://tree-sitter.github.io/
 
-use tree_sitter::Language;
+use tree_sitter_language::LanguageFn;
 
 extern "C" {
-    fn tree_sitter_git_commit() -> Language;
+    fn tree_sitter_git_commit() -> *const ();
 }
 
-/// Get the tree-sitter [Language][] for this grammar.
+/// The tree-sitter [`LanguageFn`][LanguageFn] for this grammar.
 ///
-/// [Language]: https://docs.rs/tree-sitter/*/tree_sitter/struct.Language.html
-pub fn language() -> Language {
-    unsafe { tree_sitter_git_commit() }
-}
+/// [LanguageFn]: https://docs.rs/tree-sitter-language/*/tree_sitter_language/struct.LanguageFn.html
+pub const LANGUAGE: LanguageFn = unsafe { LanguageFn::from_raw(tree_sitter_git_commit) };
 
 /// The content of the [`node-types.json`][] file for this grammar.
 ///
@@ -42,11 +40,13 @@ pub const NODE_TYPES: &'static str = include_str!("../../src/node-types.json");
 
 #[cfg(test)]
 mod tests {
+    use crate::LANGUAGE;
+
     #[test]
     fn test_can_load_grammar() {
         let mut parser = tree_sitter::Parser::new();
         parser
-            .set_language(&super::language())
+            .set_language(&LANGUAGE.into())
             .expect("Error loading git_commit language");
     }
 }
